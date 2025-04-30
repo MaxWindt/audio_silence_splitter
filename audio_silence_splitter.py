@@ -6,7 +6,7 @@
 
 import math
 import os
-from moviepy.editor import AudioFileClip, VideoFileClip
+from moviepy import AudioFileClip, VideoFileClip
 from proglog.proglog import default_bar_logger
 
 import math
