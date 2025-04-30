@@ -1,0 +1,57 @@
+name: Platform-Specific Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            arch: arm64
+            platform: darwin-arm
+          - os: macos-latest
+            arch: x64
+            platform: darwin-amd
+          - os: ubuntu-latest
+            arch: x64
+            platform: linux-amd
+          - os: windows-latest
+            arch: x64
+            platform: windows-amd
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+          architecture: ${{ matrix.arch }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        shell: bash
+
+      - name: Build package
+        run: |
+          # Architecture-specific build commands
+          if [[ "${{ matrix.platform }}" == "darwin-arm" ]]; then
+            echo "Building for macOS with ARM architecture"
+            # Add your macOS ARM-specific build commands here
+          elif [[ "${{ matrix.platform }}" == "darwin-amd" ]]; then
+            echo "Building for macOS with AMD architecture"
+            # Add your macOS AMD-specific build commands here
+          else
+            echo "Building for ${{ runner.os }} with AMD architecture"
+            # Add your AMD-specific build commands here
+          fi
+        shell: bash
