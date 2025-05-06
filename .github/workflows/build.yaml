@@ -94,7 +94,10 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*.*
+          files: |
+            artifacts/**/*.exe
+            artifacts/**/*.zip
+            artifacts/**/*.tar.gz
           draft: false
           prerelease: false
           update_existing: true
