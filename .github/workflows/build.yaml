@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
     tags:
-      - 'v*' # Run workflow on version tags, e.g. v1.0.0
+      - "v*" # Run workflow on version tags, e.g. v1.0.0
   pull_request:
     branches: [main]
 jobs:
@@ -43,23 +43,23 @@ jobs:
           if [[ "${{ matrix.platform }}" == "darwin-arm" ]]; then
             echo "Building for macOS with ARM architecture"
             # Add your macOS ARM-specific build commands here
-            # For example: pyinstaller --onefile your_app.py --name your_app-${{ matrix.platform }}
+            pyinstaller --onefile --noconsole main.py --name audio_silence_splitter-${{ matrix.platform }}
           elif [[ "${{ matrix.platform }}" == "darwin-amd" ]]; then
             echo "Building for macOS with AMD architecture"
-            # Add your macOS AMD-specific build commands here
+            pyinstaller --onefile --noconsole main.py --name audio_silence_splitter-${{ matrix.platform }}
           else
             echo "Building for ${{ runner.os }} with AMD architecture"
-            # Add your AMD-specific build commands here
+            pyinstaller --onefile --noconsole main.py --name audio_silence_splitter-${{ matrix.platform }}
           fi
         shell: bash
-      
+
       # Upload build artifacts
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform }}-build
           path: dist/* # Update this to match your build output path
-          
+
   release:
     name: Create Release
     needs: build
@@ -68,7 +68,7 @@ jobs:
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
-        
+
       - name: Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v2
