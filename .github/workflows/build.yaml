@@ -23,10 +23,10 @@ jobs:
             platform: darwin-amd
           - os: ubuntu-latest
             arch: x64
-            platform: linux-amd
+            platform: linux
           - os: windows-latest
             arch: x64
-            platform: windows-amd
+            platform: windows
 
     steps:
       - uses: actions/checkout@v4
@@ -97,5 +97,6 @@ jobs:
           files: artifacts/**/*.*
           draft: false
           prerelease: false
+          update_existing: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
