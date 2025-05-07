@@ -47,53 +47,32 @@ Mac Shell Command:
 ```
 #!/bin/bash
 
-# Get the name of this script
-SCRIPT_NAME=$(basename "$0")
+# Check if virtual environment exists
+if [ ! -d ".venv" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv .venv
+fi
 
-echo "Checking current directory..."
+# Activate virtual environment
+source .venv/bin/activate
 
-# Check if directory is not empty (excluding hidden files and this script)
-FILE_COUNT=$(ls -A | grep -v "^\." | grep -v "^$SCRIPT_NAME$" | wc -l)
-if [ "$FILE_COUNT" -gt 0 ] && [ ! -f "rcc" ]; then
-    echo "Directory is not empty and does not contain rcc. Stopping execution."
+# Install requirements
+if [ -f "requirements.txt" ]; then
+    echo "Installing requirements..."
+    pip install -r requirements.txt
+else
+    echo "requirements.txt not found!"
     exit 1
 fi
 
-echo "Checking if RCC exists..."
-if [ -f "rcc" ]; then
-    echo "RCC executable already exists. Skipping download."
-else
-    echo "Downloading RCC executable..."
-    
-    # Detect OS and download appropriate version
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS
-        curl -o rcc https://downloads.robocorp.com/rcc/releases/v17.18.0/macos64/rcc
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Linux
-        curl -o rcc https://downloads.robocorp.com/rcc/releases/v17.18.0/linux64/rcc
-    else
-        echo "Unsupported operating system: $OSTYPE"
-        exit 1
-    fi
-    
-    # Check if download was successful
-    if [ $? -ne 0 ]; then
-        echo "Failed to download RCC executable."
-        exit 1
-    fi
-    
-    # Make it executable
-    chmod +x rcc
-    echo "RCC downloaded successfully."
+# Create run script only if it doesn't exist
+if [ ! -f "run.sh" ]; then
+    echo "Creating run script..."
+    echo '#!/bin/bash
+source .venv/bin/activate
+python main.py' > run.sh
+    chmod +x run.sh
 fi
 
-# Make sure rcc is executable (in case it exists but isn't executable)
-chmod +x rcc
-
-echo "Pulling repository from GitHub..."
-./rcc pull github.com/MaxWindt/audio_silence_splitter
-echo "Running the tool..."
-./rcc run
-echo "Process completed." 
+echo "Installation complete. Run with: ./run.sh"
 ```
