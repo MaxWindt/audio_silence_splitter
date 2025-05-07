@@ -1,4 +1,6 @@
-Windows:
+
+
+Windows CMD Command:
 ```
 @echo off
 setlocal enabledelayedexpansion
@@ -41,7 +43,7 @@ rcc.exe run
 echo Process completed.
 ```
 
-Mac:
+Mac Shell Command:
 ```
 #!/bin/bash
 
