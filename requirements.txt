@@ -1,5 +1,4 @@
 flet==0.27.6
 moviepy==2.1.2
 proglog==0.1.11
-watchdog==3.0.0
-pyinstaller==6.13.0
+watchdog==6.0.0
