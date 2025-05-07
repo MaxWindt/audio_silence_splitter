@@ -35,7 +35,7 @@ if exist "rcc.exe" (
     echo RCC downloaded successfully.
 )
 echo Pulling repository from GitHub...
-rcc.exe pull github.com/MaxWindt/ZoomParticipantsCreator
+rcc.exe pull github.com/MaxWindt/audio_silence_splitter
 echo Running the tool...
 rcc.exe run
 echo Process completed.
@@ -90,7 +90,7 @@ fi
 chmod +x rcc
 
 echo "Pulling repository from GitHub..."
-./rcc pull github.com/MaxWindt/ZoomParticipantsCreator
+./rcc pull github.com/MaxWindt/audio_silence_splitter
 echo "Running the tool..."
 ./rcc run
 echo "Process completed." 
