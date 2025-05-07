@@ -22,7 +22,7 @@ jobs:
       - name: Build package
         run: |
           echo "Building for macOS ARM"
-          pyinstaller --onefile --noconsole main.py --name audio_silence_splitter-darwin-arm
+          pyinstaller main.py --name audio_silence_splitter-darwin-arm
         shell: bash
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
