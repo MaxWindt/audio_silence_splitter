@@ -97,10 +97,6 @@ def find_speaking(
             else:
                 speaking_intervals.append(new_speaking_interval)
 
-    if not speaking_intervals:
-        # If no speaking intervals found, return the whole file
-        speaking_intervals = [[0, audio_clip.duration]]
-
     clean_speaking_intervals = clean_intervals(speaking_intervals, silence_min_len)
 
     # Handle the BEG_END_only case
@@ -257,6 +253,9 @@ def main(
     clip.close()
     if is_video and "video_clip" in locals():
         video_clip.close()
+
+    if not intervals_to_keep:
+        processing_folder = "Audio was silent, no clips created."
 
     return processing_folder
 
