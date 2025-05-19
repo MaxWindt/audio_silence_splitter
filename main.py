@@ -122,7 +122,7 @@ class AudioSplitterApp:
                 processing_folder = output_folder
             else:
                 processing_folder = os.path.join(
-                    os.path.dirname(file_path), "processing"
+                    os.path.dirname(file_path), "processed"
                 )
 
             os.makedirs(processing_folder, exist_ok=True)
@@ -140,6 +140,11 @@ class AudioSplitterApp:
                 output_name = name_template
 
             output_path = os.path.join(processing_folder, output_name)
+
+            # Check if output file already exists
+            if os.path.exists(output_path):
+                self.add_log(f"Skipping file {file_path}, output file already exists")
+                return
 
             # Process the file using the main function from audio_silence_splitter
             # Run in a separate thread to avoid blocking the UI
@@ -262,8 +267,8 @@ class AudioSplitterApp:
     def pick_file(self, e):
         def update_file_field(result):
             if result is not None and result.files:
-                file_path = result.files[0].path
-                self.process_file(file_path)
+                for file_path in result.files:
+                    self.process_file(file_path.path)
 
         if not self.file_picker:
             self.file_picker = ft.FilePicker(on_result=update_file_field)
@@ -282,7 +287,7 @@ class AudioSplitterApp:
                 "ogg",
                 "flac",
             ],
-            allow_multiple=False,
+            allow_multiple=True,
         )
 
     def add_log(self, message):
@@ -343,7 +348,7 @@ class AudioSplitterApp:
         )
 
         self.process_file_button = ft.ElevatedButton(
-            text="Process Single File",
+            text="Process Files",
             bgcolor=ft.colors.GREEN_400,
             color=ft.colors.WHITE,
             on_click=self.pick_file,
