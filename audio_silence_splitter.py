@@ -8,6 +8,48 @@ import math
 import os
 from moviepy import AudioFileClip, VideoFileClip
 from proglog.proglog import default_bar_logger
+import subprocess
+import re
+import tempfile
+import os
+import imageio_ffmpeg
+
+ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
+
+
+def get_audio_duration(filename):
+    cmd = [ffmpeg_path, "-i", filename, "-f", "null", "-"]
+    process = subprocess.run(
+        cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, text=True
+    )
+    output = process.stderr
+    match = re.search(r"time=(\d+:\d+:\d+\.\d+)", output)
+    if match:
+        time_str = match.group(1)
+        h, m, s = map(float, time_str.split(":"))
+        return h * 3600 + m * 60 + s
+    return None
+
+
+def fix_audio_metadata(input_file):
+    if not os.path.exists(input_file):
+        raise FileNotFoundError(f"File not found: {input_file}")
+
+    duration = get_audio_duration(input_file)
+    if duration is None:
+        raise ValueError("Could not determine duration of the input file.")
+
+    print(f"Calculated duration: {duration:.2f} seconds")
+
+    # Create temp folder and output path
+    temp_dir = tempfile.mkdtemp()
+    output_file = os.path.join(temp_dir, "output_fixed.webm")
+
+    # Re-mux using FFmpeg
+    cmd = [ffmpeg_path, "-i", input_file, "-c", "copy", output_file]
+    subprocess.run(cmd, check=True)
+
+    return output_file
 
 
 def clean_intervals(intervals_to_keep, silence_min_len=5):
@@ -34,7 +76,7 @@ def clean_intervals(intervals_to_keep, silence_min_len=5):
 #  volume_threshold: volume below this threshold is considered to be silence
 #  ease_in: (in seconds) add this much silence around speaking intervals
 def find_speaking(
-    dir,
+    file_in,
     BEG_END_only=False,
     silence_min_len=5,
     volume_threshold=0.01,
@@ -44,11 +86,19 @@ def find_speaking(
 ):
     logger = default_bar_logger(logger)  # shorthand to generate a bar logger
     try:
-        video_clip = VideoFileClip(dir)
+        video_clip = VideoFileClip(file_in)
         audio_clip = video_clip.audio
     except:
-        audio_clip = AudioFileClip(dir)
-    # First, iterate over audio to find all silent windows.
+        try:
+            audio_clip = AudioFileClip(
+                file_in,
+            )
+        except OSError:
+            print("Error: Duration not found. Calculating duration...")
+            file_in = fix_audio_metadata(file_in)
+            audio_clip = AudioFileClip(
+                file_in,
+            )
     num_windows = math.floor(audio_clip.end / window_size)
     window_is_silent = []
     for i in logger.iter_bar(timestamps=range(num_windows)):
@@ -113,7 +163,7 @@ def find_speaking(
     except:
         pass
 
-    return speaking_intervals_final
+    return file_in, speaking_intervals_final
 
 
 def main(
@@ -143,7 +193,7 @@ def main(
     """
     silence_min_len = silence_min_len * 60  # Convert to seconds
     # Get intervals to keep (non-silent parts)
-    intervals_to_keep = find_speaking(
+    analysed_file, intervals_to_keep = find_speaking(
         file_in,
         BEG_END_only=BEG_END_only,
         silence_min_len=silence_min_len,
@@ -157,12 +207,10 @@ def main(
 
     # Determine if it's a video or audio file
     try:
-        video_clip = VideoFileClip(file_in)
-        is_video = True
+        video_clip = VideoFileClip(analysed_file)
         clip = video_clip.audio
     except:
-        clip = AudioFileClip(file_in)
-        is_video = False
+        clip = AudioFileClip(analysed_file)
 
     # Create subclippeds for each interval
     keep_clips = [
@@ -211,9 +259,13 @@ def main(
     else:
         # Default output location
         processing_folder = os.path.join(os.path.dirname(file_in), "processing")
-        filename_template = (
-            os.path.splitext(os.path.basename(file_in))[0] + "_take_{0}.mp3"
-        )
+        # use the input file name as the base if audio is only trimmed
+        if intervals_to_keep.__len__() == 1:
+            filename_template = os.path.splitext(os.path.basename(file_in))[0] + ".mp3"
+        else:
+            filename_template = (
+                os.path.splitext(os.path.basename(file_in))[0] + "_take_{0}.mp3"
+            )
 
     # Ensure the output directory exists
     os.makedirs(processing_folder, exist_ok=True)
@@ -226,16 +278,12 @@ def main(
             original_name = os.path.splitext(os.path.basename(file_in))[0]
             start, end = intervals_to_keep[index]
 
-            clip_filename = filename_template.format(
-                filename=original_name, index=index + 1, start=int(start), end=int(end)
-            )
-
+            clip_filename = filename_template.format(index + 1)
             # Ensure mp3 extension
-            if not clip_filename.lower().endswith(".mp3"):
-                clip_filename = os.path.splitext(clip_filename)[0] + ".mp3"
+            clip_filename = os.path.splitext(clip_filename)[0] + ".mp3"
         else:
             # Simple formatting
-            clip_filename = filename_template.format(index + 1)
+            clip_filename = filename_template
 
         clip_path = os.path.join(processing_folder, clip_filename)
 
@@ -251,8 +299,6 @@ def main(
 
     # Clean up resources
     clip.close()
-    if is_video and "video_clip" in locals():
-        video_clip.close()
 
     if not intervals_to_keep:
         processing_folder = "Audio was silent, no clips created."
@@ -261,4 +307,8 @@ def main(
 
 
 if __name__ == "__main__":
-    main(r"C:\Users\Max\Downloads\recording_2025-04-28_16_36s.webm", NORMALIZATION=True)
+    main(
+        r"C:\Users\Max\Downloads\CTFT RAW\Deutsch_20250513_22_04.webm",
+        # NORMALIZATION=True,
+        BEG_END_only=True,
+    )

@@ -221,7 +221,7 @@ class AudioSplitterApp:
             self.observer.start()
             self.is_watching = True
             self.watch_button.text = "Stop Watching"
-            self.watch_button.bgcolor = ft.colors.RED_400
+            self.watch_button.bgcolor = ft.Colors.RED_400
             self.page.update()
             self.add_log(f"Started watching folder: {folder_path}")
         except Exception as e:
@@ -237,7 +237,7 @@ class AudioSplitterApp:
             self.observer = None
             self.is_watching = False
             self.watch_button.text = "Start Watching"
-            self.watch_button.bgcolor = ft.colors.BLUE_400
+            self.watch_button.bgcolor = ft.Colors.BLUE_400
             self.page.update()
             self.add_log("Stopped watching folder")
         except Exception as e:
@@ -341,18 +341,18 @@ class AudioSplitterApp:
 
         self.watch_button = ft.ElevatedButton(
             text="Start Watching",
-            bgcolor=ft.colors.BLUE_400,
-            color=ft.colors.WHITE,
+            bgcolor=ft.Colors.BLUE_400,
+            color=ft.Colors.WHITE,
             on_click=self.toggle_watching,
-            icon=ft.icons.VISIBILITY,
+            icon=ft.Icons.VISIBILITY,
         )
 
         self.process_file_button = ft.ElevatedButton(
             text="Process Files",
-            bgcolor=ft.colors.GREEN_400,
-            color=ft.colors.WHITE,
+            bgcolor=ft.Colors.GREEN_400,
+            color=ft.Colors.WHITE,
             on_click=self.pick_file,
-            icon=ft.icons.FILE_OPEN,
+            icon=ft.Icons.FILE_OPEN,
         )
 
         self.log_text = ft.TextField(
@@ -408,7 +408,7 @@ class AudioSplitterApp:
             tabs=[
                 ft.Tab(
                     text="Main Settings",
-                    icon=ft.icons.SETTINGS,
+                    icon=ft.Icons.SETTINGS,
                     content=ft.Container(
                         content=ft.Column(
                             [
@@ -416,7 +416,7 @@ class AudioSplitterApp:
                                     [
                                         self.watch_folder_text,
                                         ft.IconButton(
-                                            icon=ft.icons.FOLDER_OPEN,
+                                            icon=ft.Icons.FOLDER_OPEN,
                                             tooltip="Select Watch Folder",
                                             on_click=lambda e: self.pick_folder(
                                                 self.watch_folder_text, e
@@ -428,7 +428,7 @@ class AudioSplitterApp:
                                     [
                                         self.output_folder_text,
                                         ft.IconButton(
-                                            icon=ft.icons.FOLDER_OPEN,
+                                            icon=ft.Icons.FOLDER_OPEN,
                                             tooltip="Select Output Folder",
                                             on_click=lambda e: self.pick_folder(
                                                 self.output_folder_text, e
@@ -451,7 +451,7 @@ class AudioSplitterApp:
                 ),
                 ft.Tab(
                     text="Advanced Settings",
-                    icon=ft.icons.TUNE,
+                    icon=ft.Icons.TUNE,
                     content=ft.Container(
                         content=ft.Column(
                             [
@@ -514,7 +514,7 @@ class AudioSplitterApp:
                 ),
                 ft.Tab(
                     text="Logs",
-                    icon=ft.icons.HISTORY,
+                    icon=ft.Icons.HISTORY,
                     content=ft.Container(
                         content=ft.Column(
                             [
@@ -539,7 +539,7 @@ class AudioSplitterApp:
             ft.AppBar(
                 title=ft.Text("Audio Silence Splitter"),
                 center_title=True,
-                bgcolor=ft.colors.SURFACE_VARIANT,
+                bgcolor=ft.Colors.SURFACE,
             ),
             tabs,
         )
